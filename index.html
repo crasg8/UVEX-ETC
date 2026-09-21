@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UVEX ETC · 1.0 m f/6</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161a22; --panel2:#1b202b; --line:#272d3a;
+    --ink:#e8ebf1; --muted:#8b93a7; --faint:#5a6376;
+    --teal:#34d3a6; --blue:#5b9dff; --red:#ff6b5a; --amber:#f5b638; --violet:#a98bff;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(1200px 600px at 80% -10%, #1a2030 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+  header{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:22px}
+  h1{font-size:22px;font-weight:650;margin:0;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:13.5px}
+  .sub b{color:var(--ink);font-weight:600}
+  .note{color:var(--faint);font-size:12px;margin-top:2px;flex-basis:100%}
+
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:22px}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-size:12px;font-weight:600;color:var(--muted);margin:0 0 14px;letter-spacing:.02em}
+
+  .mode{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:18px}
+  .mode button{flex:1;border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:600;
+    padding:9px 8px;border-radius:7px;cursor:pointer;transition:background .15s,color .15s}
+  .mode button[aria-pressed=true]{background:var(--teal);color:#06231b}
+
+  .seg{display:flex;gap:6px;margin-bottom:12px}
+  .seg button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font:inherit;font-size:12px;
+    font-weight:600;padding:7px 6px;border-radius:8px;cursor:pointer}
+  .seg button[aria-pressed=true]{border-color:var(--blue);color:var(--ink);background:#1e2740}
+
+  .field{margin-bottom:15px}
+  .field:last-child{margin-bottom:0}
+  label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);margin-bottom:6px}
+  label .u{font-size:11.5px;color:var(--faint)}
+  input[type=number],select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+    color:var(--ink);font:inherit;font-size:14px;padding:9px 11px;font-variant-numeric:tabular-nums}
+  input:focus,select:focus{outline:2px solid var(--teal);outline-offset:-1px;border-color:transparent}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chips button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);font:inherit;font-size:11.5px;
+    padding:5px 9px;border-radius:999px;cursor:pointer;font-variant-numeric:tabular-nums}
+  .chips button:hover{border-color:var(--blue);color:var(--ink)}
+
+  details{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  summary{cursor:pointer;color:var(--muted);font-size:12.5px;font-weight:600;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸ ";color:var(--faint)}
+  details[open] summary::before{content:"▾ "}
+  .adv{margin-top:14px}
+
+  .hero{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+    border-radius:12px;padding:20px;margin-bottom:16px}
+  .hero .lab{font-size:12px;color:var(--muted);font-weight:600}
+  .big{font-family:var(--mono);font-size:44px;font-weight:600;letter-spacing:-.02em;margin:4px 0 2px;line-height:1.05}
+  .big small{font-size:20px;color:var(--muted);font-weight:500}
+  .hero .aux{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .verdict{display:inline-block;margin-top:10px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px}
+  .ok{background:rgba(52,211,166,.14);color:var(--teal)}
+  .warn{background:rgba(245,182,56,.14);color:var(--amber)}
+
+  table.der{width:100%;border-collapse:collapse;font-size:13px}
+  table.der td{padding:7px 0;border-bottom:1px solid var(--line)}
+  table.der tr:last-child td{border-bottom:0}
+  table.der td:first-child{color:var(--muted)}
+  table.der td:last-child{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  .win{margin-bottom:16px}
+  .win h2{margin-bottom:8px}
+  table.win{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.win th{text-align:left;color:var(--faint);font-weight:600;font-size:11px;padding:4px 0;border-bottom:1px solid var(--line)}
+  table.win td{padding:6px 0;border-bottom:1px solid var(--line);font-family:var(--mono);font-variant-numeric:tabular-nums}
+  table.win td:first-child{font-family:var(--sans);color:var(--muted)}
+  table.win td:last-child,table.win th:last-child{text-align:right}
+  .flag{color:var(--amber)}
+
+  .noise h3{font-size:12px;font-weight:600;color:var(--muted);margin:2px 0 10px}
+  .refwl{font-size:11.5px;color:var(--faint);font-weight:400}
+  .bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--panel2);border:1px solid var(--line)}
+  .bar span{display:block;height:100%}
+  .seg-src{background:var(--teal)} .seg-sky{background:var(--blue)}
+  .seg-dark{background:var(--violet)} .seg-read{background:var(--red)}
+  .leg{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:12px;color:var(--muted)}
+  .leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .leg b{color:var(--ink);font-family:var(--mono);font-weight:500}
+
+  footer{color:var(--faint);font-size:11.5px;margin-top:22px;border-top:1px solid var(--line);padding-top:14px}
+  code{font-family:var(--mono);color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>UVEX 노출시간 계산기</h1>
+    <div class="sub"><b>1.0 m f/6</b> · UVEX crossed Czerny-Turner · ZWO ASI533MM Pro</div>
+    <div class="note">점광원 · 슬릿 제한 분해 요소당 연속선 S/N · 근사 처리량 모델 기반 추정치로, 실측 대비 대략 2배 범위에서 흔들릴 수 있음</div>
+  </header>
+
+  <div class="grid">
+    <!-- INPUTS -->
+    <div class="card">
+      <div class="mode" role="group" aria-label="계산 방향">
+        <button id="mT" aria-pressed="true">목표 S/N → 노출시간</button>
+        <button id="mS" aria-pressed="false">노출시간 → S/N</button>
+      </div>
+
+      <h2>관측 대상</h2>
+      <div class="row2">
+        <div class="field">
+          <label for="mag">등급 <span class="u">V (AB)</span></label>
+          <input type="number" id="mag" value="15" step="0.1">
+        </div>
+        <div class="field">
+          <label for="zin">적색편이 z</label>
+          <input type="number" id="zin" value="0.03" step="0.001" min="0" max="0.2">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field" id="wrapSN">
+          <label for="sn">목표 S/N <span class="u">분해요소당</span></label>
+          <input type="number" id="sn" value="30" step="0.5" min="0.1">
+        </div>
+        <div class="field" id="wrapT" hidden>
+          <label for="texp">총 노출 <span class="u">초</span></label>
+          <input type="number" id="texp" value="600" step="10" min="1">
+        </div>
+        <div class="field">
+          <label for="nsub">노출 분할 <span class="u">frames</span></label>
+          <input type="number" id="nsub" value="1" step="1" min="1">
+        </div>
+      </div>
+
+      <h2 style="margin-top:20px">파장 지정 <span class="u" style="font-weight:400;color:var(--faint)">정지파장 → z만큼 자동 이동</span></h2>
+      <div class="seg" role="group" aria-label="파장 지정 방식">
+        <button id="wSingle" aria-pressed="true">단일 정지파장</button>
+        <button id="wRange" aria-pressed="false">정지파장 범위</button>
+      </div>
+
+      <div id="paneSingle">
+        <div class="field">
+          <label for="wl">정지파장 <span class="u">nm (rest)</span></label>
+          <input type="number" id="wl" value="656.3" step="1" min="350" max="1000">
+          <div class="chips">
+            <button data-wl="486.1">Hβ 486</button>
+            <button data-wl="500.7">[OIII] 501</button>
+            <button data-wl="510">5100 연속선</button>
+            <button data-wl="620">6200 연속선</button>
+            <button data-wl="656.3">Hα 656</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="paneRange" hidden>
+        <div class="row2">
+          <div class="field"><label for="wl1">시작 <span class="u">nm (rest)</span></label><input type="number" id="wl1" value="620" step="1" min="350" max="1000"></div>
+          <div class="field"><label for="wl2">끝 <span class="u">nm (rest)</span></label><input type="number" id="wl2" value="700" step="1" min="350" max="1000"></div>
+        </div>
+        <div class="note" style="margin-top:0">정지파장 구간을 z만큼 옮겨 여러 지점에서 평가. 연속선 S/N의 중앙값과 최소~최대를 보여주고, 목표 노출은 밴드 전체가 목표 S/N에 닿는 최악값 기준.</div>
+      </div>
+
+      <h2 style="margin-top:20px">관측 조건</h2>
+      <div class="row3">
+        <div class="field">
+          <label for="see">시상 <span class="u">″</span></label>
+          <input type="number" id="see" value="2.0" step="0.1" min="0.3">
+        </div>
+        <div class="field">
+          <label for="am">Airmass</label>
+          <input type="number" id="am" value="1.2" step="0.05" min="1">
+        </div>
+        <div class="field">
+          <label for="sky">하늘 <span class="u">mag/arcsec²</span></label>
+          <input type="number" id="sky" value="20.5" step="0.1">
+        </div>
+      </div>
+
+      <h2 style="margin-top:20px">분광 설정</h2>
+      <div class="row2">
+        <div class="field">
+          <label for="gr">격자 <span class="u">lines/mm</span></label>
+          <input type="number" id="gr" value="600" step="10" min="50">
+        </div>
+        <div class="field">
+          <label for="slit">슬릿 <span class="u">μm</span></label>
+          <select id="slit">
+            <option>23</option><option>25</option>
+            <option selected>50</option><option>100</option><option>300</option>
+          </select>
+        </div>
+      </div>
+
+      <details>
+        <summary>망원경 · 검출기 상세 (기본값 = 현재 셋업)</summary>
+        <div class="adv">
+          <div class="row3">
+            <div class="field"><label for="ap">구경 <span class="u">cm</span></label><input type="number" id="ap" value="100" step="1"></div>
+            <div class="field"><label for="obs">중앙차폐</label><input type="number" id="obs" value="0.35" step="0.01"></div>
+            <div class="field"><label for="frat">f비</label><input type="number" id="frat" value="6" step="0.1"></div>
+          </div>
+          <div class="row3">
+            <div class="field"><label for="fcam">카메라 f <span class="u">mm</span></label><input type="number" id="fcam" value="100" step="1"></div>
+            <div class="field"><label for="pix">픽셀 <span class="u">μm</span></label><input type="number" id="pix" value="3.76" step="0.01"></div>
+            <div class="field"><label for="scale">처리량 배율</label><input type="number" id="scale" value="1.0" step="0.05"></div>
+          </div>
+          <div class="row3">
+            <div class="field"><label for="refl">거울 반사율 <span class="u">/장</span></label><input type="number" id="refl" value="0.84" step="0.01" min="0" max="1"></div>
+            <div class="field"><label for="nrefl">반사 횟수 <span class="u">거울 수</span></label><input type="number" id="nrefl" value="2" step="1" min="0"></div>
+            <div class="field"><label for="filt">필터 투과율 <span class="u">order filter</span></label><input type="number" id="filt" value="1.0" step="0.05" min="0" max="1"></div>
+          </div>
+          <div class="row3">
+            <div class="field"><label for="scale2" style="visibility:hidden">.</label><div style="font-size:11.5px;color:var(--faint);padding-top:9px" id="reflNote">망원경 투과 ≈ 70%</div></div>
+          </div>
+          <div class="row3">
+            <div class="field"><label for="rn">읽기잡음 <span class="u">e⁻ · 1.0~3.8</span></label><input type="number" id="rn" value="2.0" step="0.1"></div>
+            <div class="field"><label for="dk">암전류 <span class="u">e⁻/s/px</span></label><input type="number" id="dk" value="0.0005" step="0.0005"></div>
+            <div class="field"><label for="fmax">프레임당 상한 <span class="u">s · 경고선</span></label><input type="number" id="fmax" value="1200" step="60" min="1"></div>
+          </div>
+          <div class="row3">
+            <div class="field"><label for="zmargin">라인 경고폭 <span class="u">Å (rest)</span></label><input type="number" id="zmargin" value="60" step="10" min="0"></div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="card">
+      <div class="hero">
+        <div class="lab" id="heroLab">필요 노출시간</div>
+        <div class="big" id="heroVal">–</div>
+        <div class="aux" id="heroAux">–</div>
+        <div><span class="verdict" id="verdict"></span></div>
+      </div>
+
+      <div class="win" id="winWrap" hidden>
+        <h2 id="winTitle">밴드별 결과</h2>
+        <table class="win">
+          <thead><tr><th>구간</th><th>정지→관측 nm</th><th>R</th><th id="winCol">결과</th></tr></thead>
+          <tbody id="winBody"></tbody>
+        </table>
+      </div>
+
+      <h2>도출 값 <span class="refwl" id="refwl"></span></h2>
+      <table class="der">
+        <tr><td>플레이트 스케일</td><td id="d_ps">–</td></tr>
+        <tr><td>슬릿 하늘 상 각폭</td><td id="d_slitang">–</td></tr>
+        <tr><td>슬릿 투과율</td><td id="d_tslit">–</td></tr>
+        <tr><td>분산</td><td id="d_disp">–</td></tr>
+        <tr><td>분해 요소 Δλ</td><td id="d_res">–</td></tr>
+        <tr><td>유효 분해능 R (λ)</td><td id="d_R">–</td></tr>
+        <tr><td>유효 집광면적</td><td id="d_area">–</td></tr>
+        <tr><td>총 처리량 η (대기 포함)</td><td id="d_eta">–</td></tr>
+      </table>
+
+      <div class="noise" style="margin-top:18px">
+        <h3>분해 요소당 계수율 · 잡음 분해</h3>
+        <table class="der" style="margin-bottom:12px">
+          <tr><td>별빛</td><td id="r_src">–</td></tr>
+          <tr><td>하늘</td><td id="r_sky">–</td></tr>
+          <tr><td>암전류</td><td id="r_dark">–</td></tr>
+          <tr><td>읽기잡음 (총)</td><td id="r_read">–</td></tr>
+          <tr><td>추출 픽셀 수</td><td id="r_npix">–</td></tr>
+        </table>
+        <div class="bar" id="bar">
+          <span class="seg-src" id="s_src"></span><span class="seg-sky" id="s_sky"></span>
+          <span class="seg-dark" id="s_dark"></span><span class="seg-read" id="s_read"></span>
+        </div>
+        <div class="leg">
+          <span><i class="seg-src"></i>별빛 <b id="p_src">–</b></span>
+          <span><i class="seg-sky"></i>하늘 <b id="p_sky">–</b></span>
+          <span><i class="seg-dark"></i>암전류 <b id="p_dark">–</b></span>
+          <span><i class="seg-read"></i>읽기 <b id="p_read">–</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    분산은 UVEX 카메라 초점거리(기본 100 mm)와 격자 밀도로부터, 분해능은 슬릿의 검출기 투영폭(1:1)으로부터 계산함.
+    처리량 곡선은 대기소광 · 망원경 반사 2회 · UVEX 광학+격자(500 nm 블레이즈 가정) · IMX533 QE(피크 약 91%, 550 nm)를 합성한 근사값으로,
+    실측 처리량이 다르면 "처리량 배율"로 보정할 것. 하늘밝기는 선택 파장의 AB 표면밝기로 단순 적용.
+    적색편이 모드는 공기 정지파장(Hβ 486.1 · [OIII] 495.9/500.7 · [NII] 654.8/658.3 · Hα 656.3 · [SII] 671.6/673.1)을 (1+z)로 옮겨 라인 회피를 판정함.
+  </footer>
+</div>
+
+<script>
+"use strict";
+const H=6.626e-27, C_A=3.0e18, ARCSEC=206265;
+
+function erf(x){
+  const s=x<0?-1:1; x=Math.abs(x);
+  const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+}
+function interp(tab,nm){
+  if(nm<=tab[0][0])return tab[0][1];
+  if(nm>=tab[tab.length-1][0])return tab[tab.length-1][1];
+  for(let i=0;i<tab.length-1;i++){const[a,va]=tab[i],[b,vb]=tab[i+1];
+    if(nm>=a&&nm<=b)return va+(vb-va)*(nm-a)/(b-a);}
+  return tab[tab.length-1][1];
+}
+// system efficiency (telescope x UVEX x grating x QE), excl. atmosphere & slit
+// system efficiency = UVEX x grating x QE(IMX533 spec curve). Telescope reflectivity is applied separately.
+const ETA=[[350,0.013],[400,0.131],[450,0.263],[500,0.297],[550,0.267],[600,0.204],
+           [650,0.150],[700,0.106],[750,0.067],[800,0.044],[900,0.014],[1000,0.0024]];
+const KEXT=[[350,0.70],[400,0.45],[450,0.27],[500,0.18],[550,0.13],[600,0.11],
+            [650,0.09],[700,0.07],[750,0.06],[800,0.05],[900,0.04],[1000,0.03]];
+// rest-frame air wavelengths (nm) of lines to avoid
+const LINES=[["Hβ",486.13],["[OIII]",495.89],["[OIII]",500.68],
+             ["[NII]",654.80],["Hα",656.28],["[NII]",658.34],
+             ["[SII]",671.64],["[SII]",673.08]];
+
+function Nlam(mAB,lamA){return 3631e-23*Math.pow(10,-0.4*mAB)/(H*lamA);}
+
+const $=id=>document.getElementById(id);
+let mode="T";          // T: solve time ; S: solve S/N
+let wlMode="single";   // single | range | z
+
+function fmtTime(t){
+  if(!isFinite(t)||t<=0)return"–";
+  if(t<90)return t.toFixed(t<10?1:0)+" s";
+  if(t<5400)return(t/60).toFixed(1)+" min";
+  return(t/3600).toFixed(2)+" h";
+}
+function fmtRate(r){
+  if(r>=100)return r.toFixed(0);
+  if(r>=1)return r.toFixed(2);
+  if(r>=0.001)return r.toFixed(4);
+  return r.toExponential(2);
+}
+
+// evaluate everything at a single wavelength (nm)
+function evalAt(wl,P){
+  const lamA=wl*10;
+  const telRefl=Math.pow(P.refl,P.nrefl);
+  const filt=(P.filt>0&&P.filt<=1)?P.filt:1;
+  const etaSys=interp(ETA,wl)*telRefl*filt*P.scale;
+  const Tatm=Math.pow(10,-0.4*interp(KEXT,wl)*P.am);
+  const eta=etaSys*Tatm;
+  const srcRate=Nlam(P.mag,lamA)*P.Aeff*eta*P.Tslit*P.dRes;
+  const skyRate=Nlam(P.skyMag,lamA)*P.Aeff*etaSys*P.dRes*P.skyArea;
+  const darkRate=P.dark*P.Npix;
+  const readVar=P.nsub*P.RN*P.RN*P.Npix;
+  const R=lamA/P.dRes;
+
+  let t,SN;
+  if(mode==="T"){
+    SN=P.sn;
+    const a=srcRate,b=(srcRate+skyRate+darkRate);
+    const A2=a*a,B2=-SN*SN*b,C2=-SN*SN*readVar;
+    t=(-B2+Math.sqrt(B2*B2-4*A2*C2))/(2*A2);
+  }else{
+    t=P.texp;
+    SN=srcRate*t/Math.sqrt((srcRate+skyRate+darkRate)*t+readVar);
+  }
+  return {wl,eta,srcRate,skyRate,darkRate,readVar,R,t,SN};
+}
+
+function compute(){
+  const v=id=>parseFloat($(id).value);
+  const P={
+    mag:v("mag"), sn:v("sn"), texp:v("texp"), nsub:Math.max(v("nsub"),1),
+    see:Math.max(v("see"),1e-3), am:Math.max(v("am"),1), skyMag:v("sky"),
+    N:v("gr"), slit:parseFloat($("slit").value),
+    D:v("ap"), obs:v("obs"), frat:v("frat"), fcam:v("fcam"),
+    pix:v("pix"), scale:v("scale"), RN:v("rn"), dark:v("dk"),
+    refl:v("refl"), nrefl:Math.max(v("nrefl"),0), filt:v("filt")
+  };
+  // geometry & spectrograph (wavelength-independent parts)
+  const focal_mm=P.D*10*P.frat;
+  const ps=ARCSEC/focal_mm;
+  const pixAng=P.pix*1e-3*ps;
+  const slitAng=P.slit*1e-3*ps;
+  P.Aeff=Math.PI*Math.pow(P.D/2,2)*(1-P.obs*P.obs);
+  const dispA=(1e7/P.N/P.fcam)*(P.pix/1000);
+  const nDisp=P.slit/P.pix;
+  P.dRes=nDisp*dispA;
+  const sigma=P.see/2.3548;
+  P.Tslit=erf(slitAng/(2*Math.SQRT2*sigma));
+  const nSpatial=Math.max(P.see/pixAng,1);
+  P.Npix=nDisp*nSpatial;
+  P.skyArea=slitAng*P.see;
+
+  // redshift + rest-frame line clash helper
+  const z=v("zin"), marginNm=v("zmargin")/10;
+  const clashFlag=restNm=>{
+    let near=null,mind=1e9;
+    LINES.forEach(L=>{const d=Math.abs(L[1]-restNm); if(d<mind){mind=d;near=L;}});
+    return mind<marginNm?`${near[0]} ${(mind*10).toFixed(0)}Å`:null;
+  };
+
+  // build evaluation points (inputs are REST wavelengths; shift by 1+z)
+  let pts=[];
+  if(wlMode==="single"){
+    const rest=v("wl");
+    pts=[{label:"단일",wlRest:rest,wl:rest*(1+z),flag:clashFlag(rest)}];
+  }else{ // range
+    const a=v("wl1"),b=v("wl2"),lo=Math.min(a,b),hi=Math.max(a,b);
+    const n=11;
+    for(let i=0;i<n;i++){
+      const rest=lo+(hi-lo)*i/(n-1);
+      pts.push({label:i===0?"시작":i===n-1?"끝":"",wlRest:rest,wl:rest*(1+z),flag:clashFlag(rest)});
+    }
+  }
+
+  // evaluate
+  const res=pts.map(p=>({...p,...evalAt(p.wl,P)}));
+
+  // pick representative + hero aggregate
+  let rep, heroT, heroSN, aux, verdictOK, extra="";
+  const times=res.map(r=>r.t), sns=res.map(r=>r.SN);
+  const med=arr=>{const s=[...arr].sort((x,y)=>x-y);const m=Math.floor(s.length/2);
+    return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+
+  const perFrame=tot=>P.nsub>1?`${P.nsub}장 × ${fmtTime(tot/P.nsub)}`:`1장`;
+
+  if(wlMode==="single"){
+    rep=res[0];
+    const wlTxt=`정지 ${rep.wlRest.toFixed(1)} → 관측 ${rep.wl.toFixed(1)} nm (z=${z})`;
+    if(mode==="T"){heroT=rep.t;aux=`S/N ${P.sn} · ${perFrame(rep.t)} · V=${P.mag} · ${wlTxt}`;}
+    else{heroSN=rep.SN;aux=`총 ${fmtTime(rep.t)} · ${perFrame(rep.t)} · V=${P.mag} · ${wlTxt}`;}
+  }else{ // range
+    const mid=res[Math.floor(res.length/2)];rep=mid;
+    if(mode==="T"){heroT=Math.max(...times);
+      aux=`밴드 전체 S/N≥${P.sn} · ${perFrame(heroT)} · 중앙값 ${fmtTime(med(times))} · z=${z}`;}
+    else{heroSN=Math.min(...sns);
+      aux=`밴드 최소 S/N ${Math.min(...sns).toFixed(1)} · 중앙값 ${med(sns).toFixed(1)} · 총 ${fmtTime(P.texp)} (${perFrame(P.texp)}) · z=${z}`;}
+  }
+
+  // hero render
+  if(mode==="T"){
+    $("heroLab").textContent=P.nsub>1?"필요 노출시간 (총 = 프레임수 × 프레임당)":"필요 노출시간";
+    if(isFinite(heroT)&&heroT>0){
+      const pf=P.nsub>1?` <small>= ${P.nsub} × ${fmtTime(heroT/P.nsub)}</small>`:'';
+      $("heroVal").innerHTML=fmtTime(heroT)+pf;
+    }else{$("heroVal").innerHTML='<small>도달 불가</small>';}
+    const vd=$("verdict");
+    const fmax=parseFloat($("fmax").value)||1200;
+    const perFrameT=isFinite(heroT)?heroT/P.nsub:Infinity;
+    if(!isFinite(heroT)||heroT<=0){vd.className="verdict warn";vd.textContent="목표 S/N 도달 불가";}
+    else if(perFrameT<=fmax){vd.className="verdict ok";vd.textContent=`프레임당 ${fmtTime(perFrameT)} · 상한 이내`;}
+    else{vd.className="verdict warn";vd.textContent=`프레임당 ${fmtTime(perFrameT)} > 상한 ${fmtTime(fmax)} — 프레임 분할 늘리기`;}
+  }else{
+    $("heroLab").textContent="예상 S/N";
+    $("heroVal").innerHTML=heroSN.toFixed(heroSN<10?2:1)+' <small>/분해요소</small>';
+    const vd=$("verdict");
+    if(heroSN>=5){vd.className="verdict ok";vd.textContent="S/N ≥ 5";}
+    else{vd.className="verdict warn";vd.textContent="S/N < 5 — 노출·슬릿 늘리기";}
+  }
+  $("heroAux").textContent=aux;
+
+  // window table (range only)
+  const winWrap=$("winWrap");
+  if(wlMode==="single"){winWrap.hidden=true;}
+  else{
+    winWrap.hidden=false;
+    $("winTitle").textContent="밴드별 결과 (정지 → 관측)";
+    $("winCol").textContent=mode==="T"?"노출시간":"S/N";
+    const rows=res.filter((_,i)=>i%2===0).map(r=>{
+      const val=mode==="T"?fmtTime(r.t):r.SN.toFixed(1);
+      const fl=r.flag?` <span class="flag">⚠ ${r.flag}</span>`:"";
+      const lab=(r.label||"·")+fl;
+      const wlTxt=`${r.wlRest.toFixed(0)}→${r.wl.toFixed(0)}`;
+      return `<tr><td>${lab}</td><td>${wlTxt}</td><td>${r.R.toFixed(0)}</td><td>${val}</td></tr>`;
+    }).join("");
+    $("winBody").innerHTML=rows;
+  }
+
+  // derived + noise at representative wl
+  $("reflNote").textContent=`망원경 투과 ≈ ${(Math.pow(P.refl,P.nrefl)*100).toFixed(0)}%`;
+  $("refwl").textContent="@ 관측 "+rep.wl.toFixed(1)+" nm (정지 "+rep.wlRest.toFixed(1)+")";
+  $("d_ps").textContent=ps.toFixed(2)+" ″/mm";
+  $("d_slitang").textContent=slitAng.toFixed(2)+" ″";
+  $("d_tslit").textContent=(P.Tslit*100).toFixed(0)+" %";
+  $("d_disp").textContent=dispA.toFixed(3)+" Å/px";
+  $("d_res").textContent=P.dRes.toFixed(2)+" Å ("+nDisp.toFixed(1)+" px)";
+  $("d_R").textContent="≈ "+rep.R.toFixed(0);
+  $("d_area").textContent=(P.Aeff/1e4).toFixed(3)+" m²";
+  $("d_eta").textContent=(rep.eta*100).toFixed(1)+" %";
+
+  const t=rep.t;
+  const varSrc=rep.srcRate*t,varSky=rep.skyRate*t,varDark=rep.darkRate*t,varRead=rep.readVar;
+  const varTot=varSrc+varSky+varDark+varRead||1;
+  $("r_src").textContent=fmtRate(rep.srcRate)+" e⁻/s";
+  $("r_sky").textContent=fmtRate(rep.skyRate)+" e⁻/s";
+  $("r_dark").textContent=fmtRate(rep.darkRate)+" e⁻/s";
+  $("r_read").textContent=Math.sqrt(rep.readVar).toFixed(1)+" e⁻";
+  $("r_npix").textContent=P.Npix.toFixed(0)+" px";
+  const pc=x=>Math.max(0,x/varTot*100);
+  $("s_src").style.width=pc(varSrc)+"%";$("s_sky").style.width=pc(varSky)+"%";
+  $("s_dark").style.width=pc(varDark)+"%";$("s_read").style.width=pc(varRead)+"%";
+  $("p_src").textContent=pc(varSrc).toFixed(0)+"%";$("p_sky").textContent=pc(varSky).toFixed(0)+"%";
+  $("p_dark").textContent=pc(varDark).toFixed(0)+"%";$("p_read").textContent=pc(varRead).toFixed(0)+"%";
+}
+
+function setMode(m){
+  mode=m;const isT=m==="T";
+  $("mT").setAttribute("aria-pressed",isT);$("mS").setAttribute("aria-pressed",!isT);
+  $("wrapSN").hidden=!isT;$("wrapT").hidden=isT;compute();
+}
+function setWlMode(m){
+  wlMode=m;
+  $("wSingle").setAttribute("aria-pressed",m==="single");
+  $("wRange").setAttribute("aria-pressed",m==="range");
+  $("paneSingle").hidden=m!=="single";
+  $("paneRange").hidden=m!=="range";
+  compute();
+}
+$("mT").onclick=()=>setMode("T");
+$("mS").onclick=()=>setMode("S");
+$("wSingle").onclick=()=>setWlMode("single");
+$("wRange").onclick=()=>setWlMode("range");
+document.querySelectorAll(".chips button").forEach(b=>{b.onclick=()=>{$("wl").value=b.dataset.wl;compute();};});
+document.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",compute));
+
+compute();
+</script>
+</body>
+</html>
